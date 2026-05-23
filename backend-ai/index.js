@@ -2,6 +2,10 @@ import express from 'express'
 import multer from 'multer';
 import { Queue } from "bullmq";
 import { model, vectorStore } from './utils/utils.js';
+import cors from "cors";
+
+const app = express();
+app.use(cors());
 
 const queue = new Queue("file-upload-queue", {
     connection: {
@@ -22,7 +26,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-const app = express();
 
 const port = 3000;
 app.use(express.json());
@@ -65,19 +68,21 @@ app.post('/chat', async (req, res) => {
         Question:
         ${query}
     `);
-    let finalAnswer = "";
+    // IMPORTANT
+    res.setHeader("Content-Type", "text/plain");
+    res.setHeader("Transfer-Encoding", "chunked");
     for await (const chunk of response) {
 
         const text = chunk.content;
 
         process.stdout.write(text);
 
-        finalAnswer += text;
+        // SEND TOKEN IMMEDIATELY
+        res.write(text);
 
     }
-    return res.json({
-        answer: finalAnswer
-    });
+    // CLOSE STREAM
+    res.end();
 })
 
 app.listen(port, () => {
