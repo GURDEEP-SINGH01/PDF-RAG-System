@@ -1,8 +1,7 @@
 import express from 'express'
 import multer from 'multer';
 import { Queue } from "bullmq";
-import { QdrantVectorStore } from "@langchain/qdrant";
-import { OllamaEmbeddings, ChatOllama } from "@langchain/ollama";
+import { model, vectorStore } from './utils/utils.js';
 
 const queue = new Queue("file-upload-queue", {
     connection: {
@@ -44,19 +43,11 @@ app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
 
 app.post('/chat', async (req, res) => {
     const query = req.body['query'];
-    const embeddings = new OllamaEmbeddings({
-        model: "qwen2.5:3b", // Default value
-        baseUrl: "http://localhost:11434", // Default value
-    });
-    const model = new ChatOllama({
-        model: "qwen2.5:3b",
-        baseUrl: "http://localhost:11434",
-    });
 
-    const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {
-        url: 'http://localhost:6333',
-        collectionName: "pdf-agent",
-    });
+    // const model = new ChatOllama({
+    //     model: "qwen2.5:3b",
+    //     baseUrl: "http://localhost:11434",
+    // });
     const retriever = vectorStore.asRetriever({
         // Optional filter
         // filter: filter,
