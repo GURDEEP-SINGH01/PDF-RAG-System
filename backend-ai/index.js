@@ -47,10 +47,6 @@ app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
 app.post('/chat', async (req, res) => {
     const query = req.body['query'];
 
-    // const model = new ChatOllama({
-    //     model: "qwen2.5:3b",
-    //     baseUrl: "http://localhost:11434",
-    // });
     const retriever = vectorStore.asRetriever({
         // Optional filter
         // filter: filter,
